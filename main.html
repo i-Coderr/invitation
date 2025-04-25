@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Башкы бет</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+            color: #333;
+            transition: all 0.3s ease;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .invitation-card {
+            background-color: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+
+        .invitation-photo {
+            width: 100%;
+            max-width: 500px;
+            border-radius: 8px;
+            margin: 20px 0;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #ff6b6b;
+            margin-bottom: 10px;
+        }
+
+        .greeting {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+        }
+
+        .countdown {
+            font-size: 1.5rem;
+            margin: 30px 0;
+            color: #ff6b6b;
+            font-weight: bold;
+        }
+
+        .countdown span {
+            display: inline-block;
+            margin: 0 5px;
+            min-width: 50px;
+        }
+
+        .question {
+            font-size: 1.3rem;
+            margin: 30px 0 20px;
+        }
+
+        .response-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .response-btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        #yes-btn {
+            background-color: #4ecdc4;
+            color: white;
+        }
+
+        #yes-btn:hover {
+            background-color: #3da89f;
+            transform: scale(1.05);
+        }
+
+        #no-btn {
+            background-color: #ff6b6b;
+            color: white;
+        }
+
+        #no-btn:hover {
+            background-color: #e05555;
+            transform: scale(1.05);
+        }
+
+        .response-message {
+            font-size: 1.2rem;
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            display: none;
+        }
+
+        .yes-response {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .no-response {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .attendees-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 30px 0;
+            display: none;
+        }
+
+        .attendees-table th, .attendees-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .attendees-table th {
+            background-color: #4ecdc4;
+            color: white;
+        }
+
+        .attendees-table tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        .attendees-table tr:hover {
+            background-color: #e6e6e6;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 10px;
+            }
+
+            .invitation-card {
+                padding: 20px;
+            }
+
+            .response-buttons {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .response-btn {
+                width: 100%;
+            }
+
+            .attendees-table {
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="invitation-card">
+        <h1>Чакыруу билети</h1>
+        <p class="greeting" id="personal-greeting"></p>
+
+        <img src="https://images.unsplash.com/photo-1511795409834-ef04bbd61622?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80"
+             alt="Party Image" class="invitation-photo">
+
+        <p>Алтындай болгон менин сүйүктүү классташым, <br>
+            Сизди көптөн көп күткөң 20 жылдык кечебизге чын жүрөктөн чакырабыз!
+        </p>
+
+        <div class="countdown" id="countdown-timer">
+            <span id="days">00</span> күн
+            <span id="hours">00</span> саат
+            <span id="minutes">00</span> мүнөт
+            <span id="seconds">00</span> секунд
+        </div>
+
+        <p class="question">20 жылдык кечеге келесизби?</p>
+
+        <div class="response-buttons">
+            <button class="response-btn" id="yes-btn">Кудай буюрса барам!</button>
+            <button class="response-btn" id="no-btn">Тилекке каршы, бара албайм!</button>
+        </div>
+
+        <div class="response-message yes-response" id="yes-message">
+            Соонун! Биз абдан кубанычтабыз жана сизди чыдамсыздык менен күтөбүз!
+        </div>
+
+        <div class="response-message no-response" id="no-message">
+            Каап мейли эми. Кийин деле жолугушабыз!
+        </div>
+
+        <h2>Келе тургандардын тизмеси</h2>
+        <table class="attendees-table" id="attendees-table">
+            <thead>
+            <tr>
+                <th>#</th>
+                <th>Аты жөнү</th>
+                <th>Жооп берген күнү</th>
+            </tr>
+            </thead>
+            <tbody id="attendees-list">
+            <!-- Attendees will be listed here -->
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Check if name exists in localStorage
+        const storedName = localStorage.getItem('partyUserName');
+        const personalGreeting = document.getElementById('personal-greeting');
+
+        if (storedName) {
+            personalGreeting.textContent = `Урматтуу, ${storedName}!`;
+        } else {
+            // If no name is found, redirect back to index.html
+            window.location.href = 'index.html';
+        }
+
+        // Initialize attendees list in localStorage if it doesn't exist
+        if (!localStorage.getItem('partyAttendees')) {
+            localStorage.setItem('partyAttendees', JSON.stringify([]));
+        }
+
+        // Display existing attendees
+        updateAttendeesList();
+
+        // Start the countdown
+        updateCountdown();
+        setInterval(updateCountdown, 1000);
+
+        // Response buttons functionality
+        const yesBtn = document.getElementById('yes-btn');
+        const noBtn = document.getElementById('no-btn');
+        const yesMessage = document.getElementById('yes-message');
+        const noMessage = document.getElementById('no-message');
+
+        yesBtn.addEventListener('click', function() {
+            yesMessage.style.display = 'block';
+            noMessage.style.display = 'none';
+
+            // Store response
+            localStorage.setItem('partyResponse', 'yes');
+
+            // Add user to attendees list if not already there
+            const attendees = JSON.parse(localStorage.getItem('partyAttendees'));
+            const userIndex = attendees.findIndex(attendee => attendee.name === storedName);
+
+            if (userIndex === -1) {
+                attendees.push({
+                    name: storedName,
+                    date: new Date().toLocaleDateString()
+                });
+                localStorage.setItem('partyAttendees', JSON.stringify(attendees));
+                updateAttendeesList();
+            }
+        });
+
+        noBtn.addEventListener('click', function() {
+            noMessage.style.display = 'block';
+            yesMessage.style.display = 'none';
+
+            // Store response
+            localStorage.setItem('partyResponse', 'no');
+
+            // Remove user from attendees list if they were previously added
+            const attendees = JSON.parse(localStorage.getItem('partyAttendees'));
+            const filteredAttendees = attendees.filter(attendee => attendee.name !== storedName);
+            localStorage.setItem('partyAttendees', JSON.stringify(filteredAttendees));
+            updateAttendeesList();
+        });
+
+        // Check for stored response
+        const storedResponse = localStorage.getItem('partyResponse');
+        if (storedResponse === 'yes') {
+            yesMessage.style.display = 'block';
+        } else if (storedResponse === 'no') {
+            noMessage.style.display = 'block';
+        }
+
+        // Countdown function
+        function updateCountdown() {
+            const now = new Date();
+            const currentYear = now.getFullYear();
+            let partyDate = new Date(currentYear, 4, 26); // May is month 4 (0-indexed)
+
+            // If May 26 has already passed this year, set for next year
+            if (now > partyDate) {
+                partyDate = new Date(currentYear + 1, 4, 26);
+            }
+
+            const diff = partyDate - now;
+
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+            document.getElementById('days').textContent = days.toString().padStart(2, '0');
+            document.getElementById('hours').textContent = hours.toString().padStart(2, '0');
+            document.getElementById('minutes').textContent = minutes.toString().padStart(2, '0');
+            document.getElementById('seconds').textContent = Math.floor(seconds).toString().padStart(2, '0');
+        }
+
+        // Update attendees list function
+        function updateAttendeesList() {
+            const attendees = JSON.parse(localStorage.getItem('partyAttendees'));
+            const attendeesList = document.getElementById('attendees-list');
+            const attendeesTable = document.getElementById('attendees-table');
+
+            attendeesList.innerHTML = '';
+
+            if (attendees.length > 0) {
+                attendeesTable.style.display = 'table';
+
+                attendees.forEach((attendee, index) => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                            <td>${index + 1}</td>
+                            <td>${attendee.name}</td>
+                            <td>${attendee.date}</td>
+                        `;
+                    attendeesList.appendChild(row);
+                });
+            } else {
+                attendeesTable.style.display = 'none';
+            }
+        }
+    });
+</script>
+</body>
+</html>
