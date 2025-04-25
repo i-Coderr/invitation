@@ -24,66 +24,94 @@
         }
 
         .invitation-card {
-            background-color: white;
-            border-radius: 10px;
-            padding: 30px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            background-color: transparent;
+            padding: 0;
+            box-shadow: none;
+            position: relative;
         }
 
-        h1 {
-            font-size: 2rem;
-            margin-bottom: 20px;
+        h2 {
+            font-size: 1.8rem;
+            margin-bottom: 30px;
             color: #ff6b6b;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
         }
 
-        .invitation-image {
+        .envelope-container {
+            position: relative;
             width: 100%;
-            max-width: 300px;
-            margin: 20px auto;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            margin: 0 auto;
         }
 
-        #name-form {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            margin-top: 20px;
+        .envelope-image {
+            width: 100%;
+            border-radius: 5px;
+            filter: drop-shadow(0 4px 10px rgba(0,0,0,0.2));
+        }
+
+        .name-form {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 70%;
+            text-align: center;
         }
 
         #name-input {
             padding: 12px;
-            border: 2px solid #4ecdc4;
+            border: none;
             border-radius: 5px;
             font-size: 1rem;
+            width: 100%;
+            background-color: rgba(255,255,255,0.8);
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 15px;
         }
 
         #submit-btn {
-            padding: 12px;
+            padding: 12px 25px;
             background-color: #ff6b6b;
             color: white;
             border: none;
             border-radius: 5px;
             font-size: 1rem;
             cursor: pointer;
-            transition: background-color 0.3s;
+            transition: all 0.3s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
 
         #submit-btn:hover {
             background-color: #e05555;
+            transform: translateY(-2px);
+        }
+
+        .error-message {
+            color: #e05555;
+            margin-top: 10px;
+            font-size: 0.9rem;
+            display: none;
         }
 
         @media (max-width: 600px) {
-            h1 {
+            h2 {
                 font-size: 1.5rem;
             }
 
-            .invitation-card {
-                padding: 20px;
+            .name-form {
+                width: 80%;
             }
 
-            .invitation-image {
-                max-width: 250px;
+            #name-input {
+                padding: 10px;
+                font-size: 0.9rem;
+            }
+
+            #submit-btn {
+                padding: 10px 20px;
+                font-size: 0.9rem;
             }
         }
     </style>
@@ -91,33 +119,76 @@
 <body>
 <div class="container">
     <div class="invitation-card">
-        <h1>Чакыруу билетин ачуу үчүн, атыңызды жазыңыз!</h1>
+        <h2>Чакыруу билетин ачуу үчүн, фамилия жана атыңызды жазыңыз!</h2>
 
-        <img src="https://images.unsplash.com/photo-1514525253161-7a46d19cd819?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80"
-             alt="Чакыруу сүрөтү" class="invitation-image">
+        <div class="envelope-container">
+            <img src="https://www.starfishlane.com.au/wp-content/uploads/2021/06/5x7-Euro-Rainbow-1.jpg"
+                 alt="Чакыруу конверти" class="envelope-image">
 
-        <form id="name-form">
-            <input type="text" id="name-input" placeholder="Аты жөнүңүз" required>
-            <button type="submit" id="submit-btn">Ачуу</button>
-        </form>
+            <div class="name-form">
+                <input type="text" id="name-input" placeholder="Фамилия жана атыңыз" required>
+                <div id="error-message" class="error-message">Фамилияңызды жана атыңызды жазыңыз</div>
+                <button type="submit" id="submit-btn">Ачуу</button>
+            </div>
+        </div>
     </div>
 </div>
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        const nameForm = document.getElementById('name-form');
+        const nameForm = document.querySelector('.name-form');
         const nameInput = document.getElementById('name-input');
+        const submitBtn = document.getElementById('submit-btn');
+        const errorMessage = document.getElementById('error-message');
 
+        function validateName(name) {
+            // Check if the name contains at least two words (first name and last name)
+            return name.trim().split(/\s+/).length >= 2;
+        }
+
+        function showError() {
+            errorMessage.style.display = 'block';
+            nameInput.style.border = '2px solid #e05555';
+        }
+
+        function hideError() {
+            errorMessage.style.display = 'none';
+            nameInput.style.border = 'none';
+        }
+
+        // Make the div behave like a form
         nameForm.addEventListener('submit', function(e) {
             e.preventDefault();
             const userName = nameInput.value.trim();
 
-            if (userName) {
+            if (validateName(userName)) {
                 // Store the name in localStorage
                 localStorage.setItem('partyUserName', userName);
-
                 // Redirect to main.html
                 window.location.href = 'main.html';
+            } else {
+                showError();
+            }
+        });
+
+        // Also make the button work
+        submitBtn.addEventListener('click', function() {
+            const userName = nameInput.value.trim();
+
+            if (validateName(userName)) {
+                // Store the name in localStorage
+                localStorage.setItem('partyUserName', userName);
+                // Redirect to main.html
+                window.location.href = 'main.html';
+            } else {
+                showError();
+            }
+        });
+
+        // Clear error when user starts typing
+        nameInput.addEventListener('input', function() {
+            if (errorMessage.style.display === 'block') {
+                hideError();
             }
         });
     });
