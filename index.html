@@ -1,50 +1,126 @@
-<!DOCTYPE HTML>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <link rel="icon" type="image/svg+xml" href="/assets/vite-DP6KbkAK.svg">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ulan &amp; Nargiza</title>
-    <script type="module" crossorigin="" src="/assets/index-DY5Bf97w.js"></script>
-    <link rel="stylesheet" crossorigin="" href="/assets/index-D9kcA0ic.css">
-    <style id="monica-reading-highlight-style">
-        .monica-reading-highlight {
-            animation: fadeInOut 1.5s ease-in-out;
+    <title>Чакыруу билети</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f5f5f5;
+            color: #333;
         }
 
-        @keyframes fadeInOut {
-            0%, 100% {
-                background-color: transparent;
+        .container {
+            text-align: center;
+            max-width: 500px;
+            padding: 20px;
+        }
+
+        .invitation-card {
+            background-color: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            color: #ff6b6b;
+        }
+
+        .invitation-image {
+            width: 100%;
+            max-width: 300px;
+            margin: 20px auto;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        #name-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        #name-input {
+            padding: 12px;
+            border: 2px solid #4ecdc4;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+
+        #submit-btn {
+            padding: 12px;
+            background-color: #ff6b6b;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        #submit-btn:hover {
+            background-color: #e05555;
+        }
+
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 1.5rem;
             }
-            30%, 70% {
-                background-color: rgba(2, 118, 255, 0.20);
+
+            .invitation-card {
+                padding: 20px;
+            }
+
+            .invitation-image {
+                max-width: 250px;
             }
         }
     </style>
 </head>
-<body data-new-gr-c-s-check-loaded="14.1232.0" data-gr-ext-installed="" monica-id="ofpnmcalabcbjgholdjcjblkibolbppb" monica-version="7.9.1">
-<div id="root">
-    <div class="mx-auto flex min-h-screen max-w-[800px] flex-col items-center justify-center bg-[url('https://optim.tildacdn.com/tild3836-6365-4437-a266-633363616531/-/resize/565x/-/format/webp/de1e4fde-6f71-48e4-8.jpg')] bg-cover bg-center">
-        <form class="mx-4 max-w-lg rounded-lg bg-white bg-opacity-70 p-8 text-center shadow-lg">
-            <h1 class="mb-4 text-4xl font-semibold text-gray-800">Чакыруу билетин ачуу үчүн, атыңызды жазыңыз</h1>
-            <input type="text" id="fullName" placeholder="Аты жөнүңүз" required=""
-                   class="mb-10 w-full rounded-xl border border-[#bfd5ec] p-3 font-sans text-2xl font-semibold outline-[#bfd5ec]"
-                   value="">
-            <button class="rounded-3xl border bg-[#bfd5ec] px-10 py-4 text-3xl font-semibold" type="submit">Ачуу
-            </button>
+<body>
+<div class="container">
+    <div class="invitation-card">
+        <h1>Чакыруу билетин ачуу үчүн, атыңызды жазыңыз!</h1>
+
+        <img src="https://images.unsplash.com/photo-1514525253161-7a46d19cd819?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80"
+             alt="Чакыруу сүрөтү" class="invitation-image">
+
+        <form id="name-form">
+            <input type="text" id="name-input" placeholder="Аты жөнүңүз" required>
+            <button type="submit" id="submit-btn">Ачуу</button>
         </form>
     </div>
 </div>
 
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const nameForm = document.getElementById('name-form');
+        const nameInput = document.getElementById('name-input');
 
-<deepl-input-controller translate="no">
+        nameForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const userName = nameInput.value.trim();
 
-</deepl-input-controller>
-<div id="monica-content-root" class="monica-widget" style="pointer-events: auto;">
+            if (userName) {
+                // Store the name in localStorage
+                localStorage.setItem('partyUserName', userName);
 
-</div>
+                // Redirect to main.html
+                window.location.href = 'main.html';
+            }
+        });
+    });
+</script>
 </body>
-<grammarly-desktop-integration data-grammarly-shadow-root="true">
-
-</grammarly-desktop-integration>
 </html>
