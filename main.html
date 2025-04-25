@@ -47,17 +47,74 @@
             margin-bottom: 20px;
         }
 
+        .countdown-container {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            flex-wrap: wrap;
+            margin: 30px 0;
+        }
+
         .countdown {
             font-size: 1.5rem;
-            margin: 30px 0;
             color: #ff6b6b;
             font-weight: bold;
+            border: 3px solid #4ecdc4;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px;
+            background-color: white;
+            min-width: 300px;
         }
 
         .countdown span {
             display: inline-block;
             margin: 0 5px;
             min-width: 50px;
+        }
+
+        .calendar {
+            width: 280px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            padding: 15px;
+            margin: 10px;
+            border: 3px solid #ff6b6b;
+        }
+
+        .calendar-header {
+            text-align: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            color: #ff6b6b;
+            margin-bottom: 10px;
+        }
+
+        .calendar-weekdays {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .calendar-days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+        }
+
+        .calendar-day {
+            text-align: center;
+            padding: 8px;
+            border-radius: 50%;
+        }
+
+        .highlight {
+            background-color: #ff6b6b;
+            color: white;
+            font-weight: bold;
         }
 
         .question {
@@ -174,22 +231,39 @@
     <div class="invitation-card">
         <h1>Чакыруу билети</h1>
         <p class="greeting" id="personal-greeting"></p>
+        <p class="greeting">Сизди 26-май 2025 жылы <b>Алтын Казык</b> ресторанында өтө турчу  <br>
+            20 жылдык кечебизге чын жүрөктөн чакырабыз! <br>
+            <br>
+            Келип көңүл ачып кечебиздин кадырлуу коногу болуп кетиңиздер!
+        </p>
 
         <img src="https://images.unsplash.com/photo-1511795409834-ef04bbd61622?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=80"
              alt="Party Image" class="invitation-photo">
 
-        <p>Алтындай болгон менин сүйүктүү классташым, <br>
-            Сизди көптөн көп күткөң 20 жылдык кечебизге чын жүрөктөн чакырабыз!
+        <p>КЕЛГИЛЕ КЛАССТАШТАР ЧОГУЛАЛЫ <br>
+            <br>
+            Бир мектеп, бир класста чогуу жүргөн, <br>
+            Күндөрдү көп эстеймин окуп жүргөн. <br>
+            Келгиле классташтар жолугалы, <br>
+            Эскерип ал учурду ойноп-күлгөн. <br>
+            <br>
+            Убакыт, мезгил өтүп, таңдар атты, <br>
+            Балалык барктуу күндөр артта калды. <br>
+            Сагындым классташтар мен силерди, <br>
+            Билинбей жыйырма жыл кайда калды. <br>
+            <br>
+            Топтолуп бир туугандай чогулалы, <br>
+            Келгиле классташтар жолугалы. <br>
+            Балалык күнүбүзгө кайра барып, <br>
+            Сырдашып чер жазышып, олтуралы. <br>
+            <br>
+            Келгиле классташтар жолугалы, <br>
+            Топтолуп бир туугандай чогулалы. <br>
+            <br>
+            автору: НУРЖАМАЛ КАЛМАМАТОВА
         </p>
-
-        <div class="countdown" id="countdown-timer">
-            <span id="days">00</span> күн
-            <span id="hours">00</span> саат
-            <span id="minutes">00</span> мүнөт
-            <span id="seconds">00</span> секунд
-        </div>
-
-        <p class="question">20 жылдык кечеге келесизби?</p>
+        <br>
+        <p class="question">20 жылдык кечебизге келесизби?</p>
 
         <div class="response-buttons">
             <button class="response-btn" id="yes-btn">Кудай буюрса барам!</button>
@@ -202,6 +276,15 @@
 
         <div class="response-message no-response" id="no-message">
             Каап мейли эми. Кийин деле жолугушабыз!
+        </div>
+
+        <div class="countdown-container">
+            <div class="countdown" id="countdown-timer">
+                <span id="days">00</span>күн
+                <span id="hours">00</span>саат
+                <span id="minutes">00</span>мүнөт
+                <span id="seconds">00</span>секунд
+            </div>
         </div>
 
         <h2>Келе тургандардын тизмеси</h2>
@@ -217,6 +300,22 @@
             <!-- Attendees will be listed here -->
             </tbody>
         </table>
+
+        <div class="calendar">
+            <div class="calendar-header">Май 2025</div>
+            <div class="calendar-weekdays">
+                <div>Д</div>
+                <div>Ш</div>
+                <div>Ш</div>
+                <div>Б</div>
+                <div>Ж</div>
+                <div>И</div>
+                <div>Ж</div>
+            </div>
+            <div class="calendar-days" id="calendar-days">
+                <!-- Calendar days will be generated by JavaScript -->
+            </div>
+        </div>
     </div>
 </div>
 
@@ -317,6 +416,41 @@
             document.getElementById('minutes').textContent = minutes.toString().padStart(2, '0');
             document.getElementById('seconds').textContent = Math.floor(seconds).toString().padStart(2, '0');
         }
+
+        // Generate calendar
+        function generateCalendar() {
+            const calendarDays = document.getElementById('calendar-days');
+            calendarDays.innerHTML = '';
+
+            // May 2024 starts on Wednesday (first day is empty until Wednesday)
+            const firstDayOffset = 3; // 0=Sunday, 1=Monday,... 3=Wednesday
+
+            // Add empty cells for days before the 1st
+            for (let i = 0; i < firstDayOffset; i++) {
+                const emptyDay = document.createElement('div');
+                emptyDay.className = 'calendar-day';
+                calendarDays.appendChild(emptyDay);
+            }
+
+            // Add days of the month
+            const daysInMay = 31;
+            const highlightDay = 26; // Circle May 26th
+
+            for (let day = 1; day <= daysInMay; day++) {
+                const dayElement = document.createElement('div');
+                dayElement.className = 'calendar-day';
+                dayElement.textContent = day;
+
+                if (day === highlightDay) {
+                    dayElement.classList.add('highlight');
+                }
+
+                calendarDays.appendChild(dayElement);
+            }
+        }
+
+        // Initialize calendar
+        generateCalendar();
 
         // Update attendees list function
         function updateAttendeesList() {
