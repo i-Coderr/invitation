@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Чакыруу билети</title>
+    <title>Чакыруу</title>
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -140,13 +140,28 @@
         const nameInput = document.getElementById('name-input');
         const submitBtn = document.getElementById('submit-btn');
         const errorMessage = document.getElementById('error-message');
+        let validNames = [];
 
-        function validateName(name) {
-            // Check if the name contains at least two words (first name and last name)
+        // Load names from names.json
+        fetch('names.json')
+            .then(response => response.json())
+            .then(data => {
+                validNames = data.users.map(user => user.name.trim().toLowerCase());
+            })
+            .catch(error => {
+                console.error('Failed to load names.json:', error);
+            });
+
+        function validateNameFormat(name) {
             return name.trim().split(/\s+/).length >= 2;
         }
 
-        function showError() {
+        function isNameInList(name) {
+            return validNames.includes(name.trim().toLowerCase());
+        }
+
+        function showError(message) {
+            errorMessage.textContent = message;
             errorMessage.style.display = 'block';
             nameInput.style.border = '2px solid #e05555';
         }
@@ -156,36 +171,36 @@
             nameInput.style.border = 'none';
         }
 
-        // Make the div behave like a form
+        function handleSubmit() {
+            const userName = nameInput.value.trim();
+
+            if (!validateNameFormat(userName)) {
+                showError('Фамилияңызды жана атыңызды жазыңыз');
+                return;
+            }
+
+            if (!isNameInList(userName)) {
+                showError('Фамилия жана атыңызды туура жазыңыз.');
+                return;
+            }
+
+            // All good → save and redirect
+            localStorage.setItem('partyUserName', userName);
+            window.location.href = 'main.html';
+        }
+
+        // "Form" submit
         nameForm.addEventListener('submit', function(e) {
             e.preventDefault();
-            const userName = nameInput.value.trim();
-
-            if (validateName(userName)) {
-                // Store the name in localStorage
-                localStorage.setItem('partyUserName', userName);
-                // Redirect to main.html
-                window.location.href = 'main.html';
-            } else {
-                showError();
-            }
+            handleSubmit();
         });
 
-        // Also make the button work
+        // Button click
         submitBtn.addEventListener('click', function() {
-            const userName = nameInput.value.trim();
-
-            if (validateName(userName)) {
-                // Store the name in localStorage
-                localStorage.setItem('partyUserName', userName);
-                // Redirect to main.html
-                window.location.href = 'main.html';
-            } else {
-                showError();
-            }
+            handleSubmit();
         });
 
-        // Clear error when user starts typing
+        // Clear error when typing
         nameInput.addEventListener('input', function() {
             if (errorMessage.style.display === 'block') {
                 hideError();
