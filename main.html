@@ -522,7 +522,7 @@
 
         // Enable audio on user interaction
         function enableAudio() {
-            audio.volume = 0.3;
+            audio.volume = 0.2;
             audio.play().catch(error => {
                 console.log("Audio playback failed:", error);
             });
@@ -640,6 +640,14 @@
             return `${day}.${month}.${year}`;
         }
 
+        // Initialize attendees list in localStorage if it doesn't exist
+        if (!localStorage.getItem('partyAttendees')) {
+            localStorage.setItem('partyAttendees', JSON.stringify([]));
+        }
+
+        // Display existing attendees
+        updateAttendeesList();
+
         // Response buttons functionality
         const yesBtn = document.getElementById('yes-btn');
         const noBtn = document.getElementById('no-btn');
@@ -653,17 +661,10 @@
             // Store response
             localStorage.setItem('partyResponse', 'yes');
 
-            // Add user to attendees list if not already there
-            const attendees = JSON.parse(localStorage.getItem('partyAttendees'));
-            const userIndex = attendees.findIndex(attendee => attendee.name === storedName);
-
-            if (userIndex === -1) {
-                attendees.push({
-                    name: storedName,
-                    date: formatDateToDDMMYYYY(new Date())
-                });
-                localStorage.setItem('partyAttendees', JSON.stringify(attendees));
-                updateAttendeesList();
+            // Add user to attendees list
+            const storedName = localStorage.getItem('partyUserName');
+            if (storedName) {
+                addUserToAttendeesList(storedName);
             }
         });
 
@@ -674,11 +675,11 @@
             // Store response
             localStorage.setItem('partyResponse', 'no');
 
-            // Remove user from attendees list if they were previously added
-            const attendees = JSON.parse(localStorage.getItem('partyAttendees'));
-            const filteredAttendees = attendees.filter(attendee => attendee.name !== storedName);
-            localStorage.setItem('partyAttendees', JSON.stringify(filteredAttendees));
-            updateAttendeesList();
+            // Remove user from attendees list
+            const storedName = localStorage.getItem('partyUserName');
+            if (storedName) {
+                removeUserFromAttendeesList(storedName);
+            }
         });
 
         // Check for stored response
@@ -689,7 +690,7 @@
             noMessage.style.display = 'block';
         }
 
-        // Countdown function
+        // Countdown function (remains the same)
         function updateCountdown() {
             const now = new Date();
             const currentYear = now.getFullYear();
@@ -713,35 +714,89 @@
             document.getElementById('seconds').textContent = Math.floor(seconds).toString().padStart(2, '0');
         }
 
-        // Update attendees list function
+        // Add user to attendees list
+        function addUserToAttendeesList(userName) {
+            const attendees = JSON.parse(localStorage.getItem('partyAttendees'));
+            const userIndex = attendees.findIndex(attendee => attendee.name === userName);
+
+            if (userIndex === -1) {
+                attendees.push({
+                    name: userName,
+                    date: formatDateToDDMMYYYY(new Date()),
+                    response: 'yes' // Indicate they responded yes
+                });
+                localStorage.setItem('partyAttendees', JSON.stringify(attendees));
+                updateAttendeesList();
+            } else if (attendees[userIndex].response !== 'yes') {
+                attendees[userIndex].response = 'yes';
+                attendees[userIndex].date = formatDateToDDMMYYYY(new Date());
+                localStorage.setItem('partyAttendees', JSON.stringify(attendees));
+                updateAttendeesList();
+            }
+        }
+
+        // Remove user from attendees list
+        function removeUserFromAttendeesList(userName) {
+            const attendees = JSON.parse(localStorage.getItem('partyAttendees'));
+            const filteredAttendees = attendees.filter(attendee => attendee.name !== userName);
+            localStorage.setItem('partyAttendees', JSON.stringify(filteredAttendees));
+            updateAttendeesList();
+        }
+
+        // Update attendees list function to only show 'yes' responses
         function updateAttendeesList() {
             const attendees = JSON.parse(localStorage.getItem('partyAttendees'));
             const attendeesList = document.getElementById('attendees-list');
             const attendeesTable = document.getElementById('attendees-table');
+            const attending = attendees.filter(attendee => attendee.response === 'yes');
 
             attendeesList.innerHTML = '';
 
-            if (attendees.length > 0) {
+            if (attending.length > 0) {
                 attendeesTable.style.display = 'table';
-
-                attendees.forEach((attendee, index) => {
+                attending.forEach((attendee, index) => {
                     const row = document.createElement('tr');
-                    // Ensure the date is in DD.MM.YYYY format
                     const formattedDate = attendee.date.includes('.')
                         ? attendee.date
                         : formatDateToDDMMYYYY(attendee.date);
                     row.innerHTML = `
-                        <td>${index + 1}</td>
-                        <td>${attendee.name}</td>
-                        <td>${formattedDate}</td>
-                    `;
+                    <td>${index + 1}</td>
+                    <td>${attendee.name}</td>
+                    <td>${formattedDate}</td>
+                `;
                     attendeesList.appendChild(row);
                 });
             } else {
                 attendeesTable.style.display = 'none';
             }
         }
+
+        // Fetch names from JSON and add to attendees table (initially with no response)
+        async function fetchUserNames() {
+            try {
+                const response = await fetch('names.json');
+                const data = await response.json();
+                const users = data.users;
+                let currentAttendees = JSON.parse(localStorage.getItem('partyAttendees')) || [];
+
+                users.forEach(user => {
+                    const existingAttendee = currentAttendees.find(attendee => attendee.name === user.name);
+                    if (!existingAttendee) {
+                        currentAttendees.push({ name: user.name, response: null }); // Initially no response
+                    }
+                });
+                localStorage.setItem('partyAttendees', JSON.stringify(currentAttendees));
+                updateAttendeesList(); // Update to reflect the fetched names (initially none will show as 'yes')
+
+            } catch (error) {
+                console.error("Error fetching names:", error);
+            }
+        }
+
+        // Fetch user names when the page loads
+        fetchUserNames();
     });
 </script>
+
 </body>
 </html>
