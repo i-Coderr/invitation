@@ -631,6 +631,15 @@
         updateCountdown();
         setInterval(updateCountdown, 1000);
 
+        // Function to format date to DD.MM.YYYY
+        function formatDateToDDMMYYYY(date) {
+            const d = new Date(date);
+            const day = d.getDate().toString().padStart(2, '0');
+            const month = (d.getMonth() + 1).toString().padStart(2, '0');
+            const year = d.getFullYear();
+            return `${day}.${month}.${year}`;
+        }
+
         // Response buttons functionality
         const yesBtn = document.getElementById('yes-btn');
         const noBtn = document.getElementById('no-btn');
@@ -651,7 +660,7 @@
             if (userIndex === -1) {
                 attendees.push({
                     name: storedName,
-                    date: new Date().toLocaleDateString()
+                    date: formatDateToDDMMYYYY(new Date())
                 });
                 localStorage.setItem('partyAttendees', JSON.stringify(attendees));
                 updateAttendeesList();
@@ -717,11 +726,15 @@
 
                 attendees.forEach((attendee, index) => {
                     const row = document.createElement('tr');
+                    // Ensure the date is in DD.MM.YYYY format
+                    const formattedDate = attendee.date.includes('.')
+                        ? attendee.date
+                        : formatDateToDDMMYYYY(attendee.date);
                     row.innerHTML = `
-                            <td>${index + 1}</td>
-                            <td>${attendee.name}</td>
-                            <td>${attendee.date}</td>
-                        `;
+                        <td>${index + 1}</td>
+                        <td>${attendee.name}</td>
+                        <td>${formattedDate}</td>
+                    `;
                     attendeesList.appendChild(row);
                 });
             } else {
