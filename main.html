@@ -85,19 +85,6 @@
             margin-top: 10px;
         }
 
-        .indicator {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background-color: #ccc;
-            margin: 0 5px;
-            cursor: pointer;
-        }
-
-        .indicator.active {
-            background-color: #ff6b6b;
-        }
-
         .photo {
             width: 100%;
             max-width: 500px;
@@ -619,18 +606,6 @@
             window.location.href = 'index.html';
         }
 
-        // Initialize attendees list in localStorage if it doesn't exist
-        if (!localStorage.getItem('partyAttendees')) {
-            localStorage.setItem('partyAttendees', JSON.stringify([]));
-        }
-
-        // Display existing attendees
-        updateAttendeesList();
-
-        // Start the countdown
-        updateCountdown();
-        setInterval(updateCountdown, 1000);
-
         // Function to format date to DD.MM.YYYY
         function formatDateToDDMMYYYY(date) {
             const d = new Date(date);
@@ -640,13 +615,146 @@
             return `${day}.${month}.${year}`;
         }
 
-        // Initialize attendees list in localStorage if it doesn't exist
-        if (!localStorage.getItem('partyAttendees')) {
-            localStorage.setItem('partyAttendees', JSON.stringify([]));
+        // Initialize attendees from names.json and merge with existing responses
+        async function initializeAttendees() {
+            try {
+                // Load names from JSON file
+                const response = await fetch('names.json');
+                const data = await response.json();
+                const usersFromJson = data.users;
+
+                // Get existing attendees from localStorage or initialize empty array
+                let currentAttendees = JSON.parse(localStorage.getItem('partyAttendees')) || [];
+
+                // Create a map of existing attendees for quick lookup
+                const existingAttendeesMap = new Map();
+                currentAttendees.forEach(attendee => {
+                    existingAttendeesMap.set(attendee.name.toLowerCase(), attendee);
+                });
+
+                // Merge JSON names with existing attendees
+                const mergedAttendees = usersFromJson.map(user => {
+                    const lowerName = user.name.toLowerCase();
+                    if (existingAttendeesMap.has(lowerName)) {
+                        // Keep existing response if available
+                        return existingAttendeesMap.get(lowerName);
+                    }
+                    // Add new user with no response
+                    return {
+                        name: user.name,
+                        response: null,
+                        date: null
+                    };
+                });
+
+                // Save merged list back to localStorage
+                localStorage.setItem('partyAttendees', JSON.stringify(mergedAttendees));
+                updateAttendeesList();
+
+            } catch (error) {
+                console.error("Error initializing attendees:", error);
+            }
         }
 
-        // Display existing attendees
-        updateAttendeesList();
+        // Add user to attendees list (marks as "yes")
+        function addUserToAttendeesList(userName) {
+            const attendees = JSON.parse(localStorage.getItem('partyAttendees')) || [];
+            const lowerUserName = userName.toLowerCase();
+
+            // Find the user (case-insensitive)
+            const userIndex = attendees.findIndex(attendee =>
+                attendee.name.toLowerCase() === lowerUserName
+            );
+
+            if (userIndex === -1) {
+                // This shouldn't happen if initialized properly, but handle just in case
+                attendees.push({
+                    name: userName,
+                    response: 'yes',
+                    date: formatDateToDDMMYYYY(new Date())
+                });
+            } else {
+                // Update existing user
+                attendees[userIndex].response = 'yes';
+                attendees[userIndex].date = formatDateToDDMMYYYY(new Date());
+            }
+
+            localStorage.setItem('partyAttendees', JSON.stringify(attendees));
+            updateAttendeesList();
+        }
+
+        // Remove user from attendees list (marks as "no")
+        function removeUserFromAttendeesList(userName) {
+            const attendees = JSON.parse(localStorage.getItem('partyAttendees')) || [];
+            const lowerUserName = userName.toLowerCase();
+
+            const userIndex = attendees.findIndex(attendee =>
+                attendee.name.toLowerCase() === lowerUserName
+            );
+
+            if (userIndex !== -1) {
+                attendees[userIndex].response = 'no';
+                attendees[userIndex].date = formatDateToDDMMYYYY(new Date());
+                localStorage.setItem('partyAttendees', JSON.stringify(attendees));
+                updateAttendeesList();
+            }
+        }
+
+        // Update attendees list display (only shows "yes" responses)
+        function updateAttendeesList() {
+            const attendees = JSON.parse(localStorage.getItem('partyAttendees')) || [];
+            const attendeesList = document.getElementById('attendees-list');
+            const attendeesTable = document.getElementById('attendees-table');
+
+            // Filter only "yes" responses and sort by date
+            const attending = attendees
+                .filter(attendee => attendee.response === 'yes')
+                .sort((a, b) => new Date(a.date) - new Date(b.date));
+
+            attendeesList.innerHTML = '';
+
+            if (attending.length > 0) {
+                attendeesTable.style.display = 'table';
+                attending.forEach((attendee, index) => {
+                    const row = document.createElement('tr');
+                    const formattedDate = attendee.date.includes('.')
+                        ? attendee.date
+                        : formatDateToDDMMYYYY(attendee.date);
+                    row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td>${attendee.name}</td>
+                    <td>${formattedDate}</td>
+                `;
+                    attendeesList.appendChild(row);
+                });
+            } else {
+                attendeesTable.style.display = 'none';
+            }
+        }
+
+        // Countdown timer function
+        function updateCountdown() {
+            const now = new Date();
+            const currentYear = now.getFullYear();
+            let partyDate = new Date(currentYear, 4, 26); // May is month 4 (0-indexed)
+
+            // If May 26 has already passed this year, set for next year
+            if (now > partyDate) {
+                partyDate = new Date(currentYear + 1, 4, 26);
+            }
+
+            const diff = partyDate - now;
+
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+            document.getElementById('days').textContent = days.toString().padStart(2, '0');
+            document.getElementById('hours').textContent = hours.toString().padStart(2, '0');
+            document.getElementById('minutes').textContent = minutes.toString().padStart(2, '0');
+            document.getElementById('seconds').textContent = Math.floor(seconds).toString().padStart(2, '0');
+        }
 
         // Response buttons functionality
         const yesBtn = document.getElementById('yes-btn');
@@ -690,111 +798,26 @@
             noMessage.style.display = 'block';
         }
 
-        // Countdown function (remains the same)
-        function updateCountdown() {
-            const now = new Date();
-            const currentYear = now.getFullYear();
-            let partyDate = new Date(currentYear, 4, 26); // May is month 4 (0-indexed)
+        // Initialize the attendees list
+        initializeAttendees();
 
-            // If May 26 has already passed this year, set for next year
-            if (now > partyDate) {
-                partyDate = new Date(currentYear + 1, 4, 26);
-            }
+        // Start the countdown
+        updateCountdown();
+        setInterval(updateCountdown, 1000);
 
-            const diff = partyDate - now;
-
-            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-
-            document.getElementById('days').textContent = days.toString().padStart(2, '0');
-            document.getElementById('hours').textContent = hours.toString().padStart(2, '0');
-            document.getElementById('minutes').textContent = minutes.toString().padStart(2, '0');
-            document.getElementById('seconds').textContent = Math.floor(seconds).toString().padStart(2, '0');
-        }
-
-        // Add user to attendees list
-        function addUserToAttendeesList(userName) {
+        // Backup function (for admin use)
+        window.exportAttendeeData = function() {
             const attendees = JSON.parse(localStorage.getItem('partyAttendees'));
-            const userIndex = attendees.findIndex(attendee => attendee.name === userName);
-
-            if (userIndex === -1) {
-                attendees.push({
-                    name: userName,
-                    date: formatDateToDDMMYYYY(new Date()),
-                    response: 'yes' // Indicate they responded yes
-                });
-                localStorage.setItem('partyAttendees', JSON.stringify(attendees));
-                updateAttendeesList();
-            } else if (attendees[userIndex].response !== 'yes') {
-                attendees[userIndex].response = 'yes';
-                attendees[userIndex].date = formatDateToDDMMYYYY(new Date());
-                localStorage.setItem('partyAttendees', JSON.stringify(attendees));
-                updateAttendeesList();
-            }
-        }
-
-        // Remove user from attendees list
-        function removeUserFromAttendeesList(userName) {
-            const attendees = JSON.parse(localStorage.getItem('partyAttendees'));
-            const filteredAttendees = attendees.filter(attendee => attendee.name !== userName);
-            localStorage.setItem('partyAttendees', JSON.stringify(filteredAttendees));
-            updateAttendeesList();
-        }
-
-        // Update attendees list function to only show 'yes' responses
-        function updateAttendeesList() {
-            const attendees = JSON.parse(localStorage.getItem('partyAttendees'));
-            const attendeesList = document.getElementById('attendees-list');
-            const attendeesTable = document.getElementById('attendees-table');
-            const attending = attendees.filter(attendee => attendee.response === 'yes');
-
-            attendeesList.innerHTML = '';
-
-            if (attending.length > 0) {
-                attendeesTable.style.display = 'table';
-                attending.forEach((attendee, index) => {
-                    const row = document.createElement('tr');
-                    const formattedDate = attendee.date.includes('.')
-                        ? attendee.date
-                        : formatDateToDDMMYYYY(attendee.date);
-                    row.innerHTML = `
-                    <td>${index + 1}</td>
-                    <td>${attendee.name}</td>
-                    <td>${formattedDate}</td>
-                `;
-                    attendeesList.appendChild(row);
-                });
-            } else {
-                attendeesTable.style.display = 'none';
-            }
-        }
-
-        // Fetch names from JSON and add to attendees table (initially with no response)
-        async function fetchUserNames() {
-            try {
-                const response = await fetch('names.json');
-                const data = await response.json();
-                const users = data.users;
-                let currentAttendees = JSON.parse(localStorage.getItem('partyAttendees')) || [];
-
-                users.forEach(user => {
-                    const existingAttendee = currentAttendees.find(attendee => attendee.name === user.name);
-                    if (!existingAttendee) {
-                        currentAttendees.push({ name: user.name, response: null }); // Initially no response
-                    }
-                });
-                localStorage.setItem('partyAttendees', JSON.stringify(currentAttendees));
-                updateAttendeesList(); // Update to reflect the fetched names (initially none will show as 'yes')
-
-            } catch (error) {
-                console.error("Error fetching names:", error);
-            }
-        }
-
-        // Fetch user names when the page loads
-        fetchUserNames();
+            const dataStr = JSON.stringify(attendees, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'attendees_backup.json';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        };
     });
 </script>
 
